@@ -25,7 +25,7 @@ stage('Push to Docker Hub') { // Run the built image
   }
 stage("deploy webapp") {
     sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
-    sh "kubectl apply -f k8s/service.yml"
-    sh "kubectl apply -f k8s/webapp-deployment.yml"
+    sh "kubectl apply -f deploy/service.yml"
+    sh "kubectl apply -f deploy/webapp-deployment.yml"
 }
 }
