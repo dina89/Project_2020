@@ -12,7 +12,7 @@ stage('Git') { // Get code from GitLab repository
 }
 
 stage("build docker") {
-customImage = docker.build "whale-app"
+customImage = sh 'docker build "whale-app"'
 }
 stage("verify dockers") {
 sh "docker images"
