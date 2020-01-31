@@ -11,6 +11,8 @@ spec:
       run: whale-app
   template:
     metadata:
+      labels:
+        run: whale-app
     spec:
       containers:
       - name: whale-pod
