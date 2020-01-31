@@ -18,7 +18,7 @@ stage("verify dockers") {
 sh "docker images"
 }
 stage('Push to Docker Hub') { // Run the built image
-    withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
+    withDockerRegistry(credentialsId: 'dockerhub-dstefansky', registry:'dstefansky/whale-app') {
         customImage.push()
     }
   }
