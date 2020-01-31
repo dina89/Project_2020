@@ -2,11 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: whale-deploy
+  labels:
+    run: whale-app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: whale-app
+      run: whale-app
   template:
     metadata:
     spec:
