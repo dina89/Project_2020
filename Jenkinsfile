@@ -12,15 +12,14 @@ stage('Git') { // Get code from GitLab repository
 }
 
 stage("build docker") {
-customImage = sh 'docker build "whale-app"'
+sh 'docker build "whale-app" -t dstefansky/whale-app:latest'
 }
 stage("verify dockers") {
 sh "docker images"
 }
 stage('Push to Docker Hub') { // Run the built image
     withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
-        sh "docker tag ${customImage.id} dstefansky/whale-app:latest"
-        sh "docker push dstefansky/whale-app"
+        sh "docker push dstefansky/whale-app:latest"
     }
   }
 stage("deploy webapp") {
