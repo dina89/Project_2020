@@ -27,5 +27,6 @@ stage("deploy webapp") {
     sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
     sh "kubectl apply -f deploy/service.yml"
     sh "kubectl apply -f deploy/webapp-deployment.yml"
+    sh "kubectl apply -f deploy/ingress.yml"
 }
 }
