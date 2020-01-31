@@ -19,7 +19,7 @@ sh "docker images"
 }
 stage('Push to Docker Hub') { // Run the built image
     withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
-       docker push dstefansky/whale-app
+       docker.push dstefansky/whale-app
     }
   }
 stage("deploy webapp") {
