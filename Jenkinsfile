@@ -18,8 +18,8 @@ stage("verify dockers") {
 sh "docker images"
 }
 stage('Push to Docker Hub') { // Run the built image
-    withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
-       docker.push dstefansky/whale-app
+    withDockerRegistry(credentialsId: 'dockerhub-dstefansky', url: 'https://hub.docker.com/repository/docker/dstefansky/whale-app') {
+        customImage.push()
     }
   }
 stage("deploy webapp") {
