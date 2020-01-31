@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  creationTimestamp: null
+  generation: 1
+  labels:
+    run: whale-app
+  name: whale-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: whale-app
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: whale-app
+    spec:
+      containers:
+      - image: dstefansky/whale-app:latest
+        imagePullPolicy: IfNotPresent
+        name: whale-app
+        resources: {}
+        ports:
+        - name: http
+          protocol: TCP
+          containerPort: 8080
