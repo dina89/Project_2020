@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whale-deploy
+  labels:
+    app: whale-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: whale-app
+  template:
+    metadata:
+      labels:
+        app: whale-app
+    spec:
+      containers:
+      - name: whale-pod
+        image: dstefansky/whale-app:latest
+        labels:
+          name: whale-pod
+        ports:
+        - name: http
+          protocol: TCP
+          containerPort: 5000

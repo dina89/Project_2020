@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: whale
+  labels:
+    app: whale-app
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /whale
+        backend:
+          serviceName: whale-svc
+          servicePort: 30001
+  selector:
+    app: whale-app
