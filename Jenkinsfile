@@ -1,6 +1,8 @@
 node("linux") {
 environment{
     credentialsId = "Github-Dina89"
+    registry = "dstefansky/whale-app"
+    registryCredential = "dockerhub-dstefansky"
 }
 def DockerImage = "whale-app:v1.0"
  def customImage = null
