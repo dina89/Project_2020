@@ -5,7 +5,7 @@ metadata:
 spec:
   selector:    
     app: whale-app
-  type: NodePort
+  type: LoadBalancer
   ports:  
   - name: http
     port: 80
