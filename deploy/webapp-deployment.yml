@@ -3,21 +3,21 @@ kind: Deployment
 metadata:
   name: whale-deploy
   labels:
-    run: whale-app
+    app: whale-app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      run: whale-app
+      app: whale-app
   template:
     metadata:
       labels:
-        run: whale-app
+        app: whale-app
     spec:
       containers:
-      - name: whale-pod
-        image: dstefansky/whale-app:latest
+      - image: dstefansky/whale-app:latest
+        name: whale-pod
         ports:
-        - name: http
+        - containerPort: 5000
+          name: http
           protocol: TCP
-          containerPort: 5000
