@@ -1,4 +1,4 @@
-# Create a pod and expose port 8080
+# Create a pod and expose port 8080 
 apiVersion: v1
 kind: Pod
 metadata:
