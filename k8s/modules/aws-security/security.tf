@@ -1,27 +1,19 @@
 resource "aws_security_group" "allow_ssh"{
    name = var.cluster_name_sg
-    description = "Open ports for nginx demo"
     vpc_id = var.vpc_id
 
     ingress {
         from_port = 22
         to_port = 22
         protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
+        cidr_blocks = ["85.250.122.190/32"]
     }
-
-    # ingress {
-    #     from_port = 80
-    #     to_port = 80
-    #     protocol = "tcp"
-    #     cidr_blocks = ["0.0.0.0/0"]
-    # }
 
     ingress {
         from_port = 30036
         to_port = 30036
         protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
+        cidr_blocks = ["85.250.122.190/32"]
     }
 
     egress {

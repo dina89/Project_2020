@@ -26,34 +26,73 @@ data "aws_eks_cluster" "cluster" {
   name = module.eks.cluster_id
 }
 
-# resource "aws_iam_role" "eks_role" {
-#   name = "eks-cluster-eks_role"
+ resource "aws_iam_role" "eks_role" {
+   name = "eks-cluster-eks_role"
 
-#   assume_role_policy = <<POLICY
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "Effect": "Allow",
-#       "Principal": {
-#         "Service": "eks.amazonaws.com"
-#       },
-#       "Action": "sts:AssumeRole"
-#     }
-#   ]
-# }
-# POLICY
-# }
+   assume_role_policy = <<POLICY
+ {
+   "Version": "2012-10-17",
+   "Statement": [
+     {
+       "Effect": "Allow",
+       "Principal": {
+         "Service": "eks.amazonaws.com"
+       },
+       "Action": "sts:AssumeRole"
+     }
+   ]
+ }
+ POLICY
+ }
 
-# resource "aws_iam_role_policy_attachment" "eks_role-AmazonEKSClusterPolicy" {
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-#   role       = aws_iam_role.eks_role.name
-# }
+ resource "aws_iam_role_policy_attachment" "eks_role-AmazonEKSClusterPolicy" {
+   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+   role       = aws_iam_role.eks_role.name
+ }
 
-# resource "aws_iam_role_policy_attachment" "eks_role-AmazonEKSServicePolicy" {
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-#   role       = aws_iam_role.eks_role.name
-# }
+ resource "aws_iam_role_policy_attachment" "eks_role-AmazonEKSServicePolicy" {
+   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+   role       = aws_iam_role.eks_role.name
+ }
+
+ resource "aws_iam_instance_profile" "eks_profile" {
+  name = "test_profile"
+  role = "${aws_iam_role.eks_role.name}"
+}
+
+resource "tls_private_key" "class1_key"{
+  algorithm = "RSA"
+  rsa_bits = 4096
+}
+
+resource "aws_key_pair" "generated_key"{
+  key_name = "bastion_key"
+  public_key = tls_private_key.class1_key.public_key_openssh
+}
+
+resource "local_file" "bastion_key" {
+  sensitive_content  = tls_private_key.class1_key.private_key_pem
+  filename           = "bastion.pem"
+}
+
+ resource "aws_instance" "bastion-host" {
+  count = 1
+  ami = "ami-024582e76075564db"
+  instance_type = "t2.micro"
+  key_name               = aws_key_pair.generated_key.key_name
+  vpc_security_group_ids =  module.security.aws_ssh_id
+  subnet_id = element(module.vpc.public_subnet_id, count.index)
+  iam_instance_profile = aws_iam_instance_profile.eks_profile.name
+  associate_public_ip_address = true
+  connection {
+      type = "ssh"
+      host = self.public_ip
+      user = "ubuntu"
+      private_key = var.private_key
+  }
+}
+
+
 
 data "aws_eks_cluster_auth" "cluster" {
   name = module.eks.cluster_id
@@ -88,15 +127,6 @@ resource "aws_security_group" "worker_group_mgmt_one" {
     ]
   }
 
-  # ingress {
-  #   from_port = 80
-  #   to_port = 80
-  #   protocol = "tcp"
-    
-  #   cidr_blocks = [
-  #     "0.0.0.0/0"
-  #   ]
-  # }
 }
 
 module "vpc" {
@@ -131,7 +161,7 @@ module "eks" {
   local_exec_interpreter = var.local_exec_interpreter
   map_users              = var.map_users
   #TODO Ssbnet id
-  subnets      = module.vpc.public_subnet_id
+  subnets      = module.vpc.private_subnet_id
 
   tags = {
     Environment = "test"
@@ -149,7 +179,7 @@ module "eks" {
       instance_type                 = "t2.micro"
       additional_userdata           = "echo foo bar"
       asg_desired_capacity          = 2
-      additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id, module.security.aws_ssh_id]
+      additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
     }
 
   ]

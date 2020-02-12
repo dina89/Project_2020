@@ -53,7 +53,7 @@ variable "destinationCIDRblock" {
 }
 variable "ingressCIDRblock" {
         type = "list"
-        default = [ "0.0.0.0/0" ]
+        default = [ "85.250.122.190/32" ]
 }
 variable "mapPublicIP" {
         default = true
