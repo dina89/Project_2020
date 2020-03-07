@@ -154,6 +154,11 @@ module "security" {
   vpc_id = module.vpc.vpc_id
 }
 
+module "consul" {
+  source = "./modules/consul"
+  region = var.region
+  vpc_id = module.vpc.vpc_id
+}
 
 module "eks" {
   source       = "terraform-aws-modules/eks/aws"
