@@ -1,0 +1,93 @@
+  - job_name: 'node-exporter'
+    consul_sd_configs:
+      - server: 'localhost:8500'
+    # All hosts detected will use port 9100 for node-exporter
+    relabel_configs:
+      - source_labels: ['__address__']
+        separator:     ':'
+        regex:         '(.*):(.*)'
+        target_label:  '__address__'
+        replacement:   '$1:9100'
+      - source_labels: [__meta_consul_node]
+        target_label: instance
+
+  - job_name: 'apache-exporter'
+    consul_sd_configs:
+      - server: 'localhost:8500'
+    relabel_configs:
+      - source_labels: ['__meta_consul_tags']
+        regex:  '.*,apache,.*'
+        target_label: job
+        # This will drop all targets that do not match the regex rule,
+        # leaving only the 'apache' targets
+        action: 'keep'
+      - source_labels: ['__address__']
+        separator:     ':'
+        regex:         '(.*):(.*)'
+        target_label:  '__address__'
+        replacement:   '$1:9117'
+      - source_labels: [__meta_consul_node]
+        target_label: instance
+
+  - job_name: 'consul-exporter'
+    consul_sd_configs:
+      - server: 'localhost:8500'
+    relabel_configs:
+      - source_labels: ['__meta_consul_service']
+        regex:  '^consul$'
+        target_label: job
+        # This will drop all targets that do not match the regex rule,
+        # leaving only the 'consul' targets
+        action: 'keep'
+      - source_labels: []
+        replacement:   '/v1/agent/metrics?format=prometheus'
+        target_label: __metrics_path__
+      - source_labels: ['__address__']
+        separator:     ':'
+        regex:         '(.*):(.*)'
+        target_label:  '__address__'
+        replacement:   '$1:8500'
+      - source_labels: [__meta_consul_node]
+        target_label: instance
+
+  - job_name: 'flask-exporter'
+    consul_sd_configs:
+      - server: 'localhost:8500'
+    relabel_configs:
+      - source_labels: ['__meta_consul_tags']
+        regex:  '.*,opsschool_flask,.*'
+        target_label: job
+        # This will drop all targets that do not match the regex rule,
+        # leaving only the 'opsschool_flask' targets
+        action: 'keep'
+      - source_labels: ['__address__']
+        separator:     ':'
+        regex:         '(.*):(.*)'
+        target_label:  '__address__'
+        replacement:   '$1:5001'
+      - source_labels: [__meta_consul_node]
+        target_label: instance
+
+git  clone https://github.com/MadDamDam/flask-http.git
+        sudo apt install docker.io
+sudo docker build -t flask-http:latest .
+        sudo docker run -d -p 5000:5000 flask-http
+        sudo docker run -d -p 5001:5001 flask-http
+
+        {
+  "service": {
+    "id": "flask-http-server-5000",
+    "name": "flask-http-server",
+    "tags": ["opsschool_flask"],
+    "port": 5000,
+    "checks": [
+      {
+        "id": "http",
+        "name": "HTTP on port 5000",
+        "http": "http://localhost:5000/",
+        "interval": "30s",
+        "timeout": "1s"
+      }
+    ]
+  }
+}

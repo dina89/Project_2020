@@ -30,12 +30,12 @@ data "aws_eks_cluster" "cluster" {
    name = "eks-cluster-eks_role"
 
    assume_role_policy = <<POLICY
- {
+{
    "Version": "2012-10-17",
    "Statement": [
-     {
+    {
        "Effect": "Allow",
-       "Principal": {
+       "Principal":{
          "Service": "eks.amazonaws.com"
        },
        "Action": "sts:AssumeRole"
@@ -60,18 +60,33 @@ data "aws_eks_cluster" "cluster" {
   role = "${aws_iam_role.eks_role.name}"
 }
 
-resource "tls_private_key" "class1_key"{
+resource "tls_private_key" "bastion_key"{
   algorithm = "RSA"
   rsa_bits = 4096
 }
 
-resource "aws_key_pair" "generated_key"{
+resource "aws_key_pair" "bastion_key"{
   key_name = "bastion_key"
-  public_key = tls_private_key.class1_key.public_key_openssh
+  public_key = tls_private_key.bastion_key.public_key_openssh
 }
 
 resource "local_file" "bastion_key" {
-  sensitive_content  = tls_private_key.class1_key.private_key_pem
+  sensitive_content  = tls_private_key.bastion_key.private_key_pem
+  filename           = "bastion.pem"
+}
+
+resource "tls_private_key" "consul_key"{
+  algorithm = "RSA"
+  rsa_bits = 4096
+}
+
+resource "aws_key_pair" "consul_key"{
+  key_name = "consul_key"
+  public_key = tls_private_key.consul_key.public_key_openssh
+}
+
+resource "local_file" "consul_key" {
+  sensitive_content  = tls_private_key.consul_key.private_key_pem
   filename           = "bastion.pem"
 }
 
@@ -79,17 +94,31 @@ resource "local_file" "bastion_key" {
   count = 1
   ami = "ami-024582e76075564db"
   instance_type = "t2.micro"
-  key_name               = aws_key_pair.generated_key.key_name
+  key_name               = aws_key_pair.bastion_key.key_name
   vpc_security_group_ids =  module.security.aws_ssh_id
   subnet_id = element(module.vpc.public_subnet_id, count.index)
   iam_instance_profile = aws_iam_instance_profile.eks_profile.name
   associate_public_ip_address = true
-  connection {
+
+    provisioner "remote-exec"{
+      inline = [
+          "sudo apt-get install unzip",
+          "curl 'https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip' -o 'awscliv2.zip'",
+          "unzip awscliv2.zip",
+          "sudo ./aws/install",
+          "curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/kubectl",
+          "chmod +x ./kubectl",
+          "sudo mv ./kubectl /usr/local/bin/kubectl"
+      ]
+  }
+
+    connection {
       type = "ssh"
       host = self.public_ip
       user = "ubuntu"
-      private_key = var.private_key
+      private_key = tls_private_key.bastion_key.private_key_pem
   }
+
 }
 
 
@@ -154,17 +183,26 @@ module "security" {
   vpc_id = module.vpc.vpc_id
 }
 
-module "consul" {
-  source = "./modules/consul"
-  region = var.region
-  vpc_id = module.vpc.vpc_id
-}
+# module "consul" {
+#   source = "./modules/consul"
+#   region = var.region
+#   vpc_id = module.vpc.vpc_id
+#   key_name = aws_key_pair.bastion_key.key_name
+# }
 
 module "eks" {
   source       = "terraform-aws-modules/eks/aws"
   cluster_name = local.cluster_name
   local_exec_interpreter = var.local_exec_interpreter
-  map_users              = var.map_users
+  map_users              = "${concat(var.map_users, 
+                                      [{
+                                        userarn  = aws_iam_instance_profile.eks_profile.arn
+                                        username = aws_iam_instance_profile.eks_profile.name
+                                        groups =  ["system:masters"]
+                                      }]
+                                      )}"
+
+
   #TODO Ssbnet id
   subnets      = module.vpc.private_subnet_id
 

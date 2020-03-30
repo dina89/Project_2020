@@ -31,7 +31,27 @@ variable "ami" {
   }
 }
 
-variable "vpc_id" {
-  default = "vpc-03736c23a1c90055a"
-  description = "ID of vpc to create instances in in the format vpc-xxxxxxxx"
+variable "prometheus_dir" {
+  description = "directory for prometheus binaries"
+  default = "/opt/prometheus"
+}
+
+variable "prometheus_conf_dir" {
+  description = "directory for prometheus configuration"
+  default = "/etc/prometheus"
+}
+
+variable "promcol_version" {
+  description = "Prometheus Collector version"
+  default = "2.16.0"
+}
+
+variable "node_exporter_version" {
+  description = "Node Exporter version"
+  default = "0.18.1"
+}
+
+variable "apache_exporter_version" {
+  description = "Apache Exporter version"
+  default = "0.7.0"
 }

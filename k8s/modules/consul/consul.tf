@@ -5,27 +5,44 @@ data "template_file" "consul_server" {
 
   vars = {
     consul_version = var.consul_version
+    node_exporter_version = var.node_exporter_version
+    prometheus_dir = var.prometheus_dir
     config = <<EOF
-     "node_name": "opsschool-server-${count.index+1}",
-     "server": true,
-     "bootstrap_expect": 3,
-     "ui": true,
-     "client_addr": "0.0.0.0"
-    EOF
+  "node_name": "opsschool-server-${count.index+1}",
+  "server": true,
+  "bootstrap_expect": 3,
+  "ui": true,
+  "client_addr": "0.0.0.0",
+  "telemetry": {
+    "prometheus_retention_time": "10m"
+  }
+EOF
   }
 }
 
 data "template_file" "consul_client" {
-  count    = var.servers
+  count    = var.clients
   template = file("${path.module}/templates/consul.sh.tpl")
 
   vars = {
       consul_version = var.consul_version
+      node_exporter_version = var.node_exporter_version
+      prometheus_dir = var.prometheus_dir
       config = <<EOF
        "node_name": "opsschool-client-${count.index+1}",
        "enable_script_checks": true,
        "server": false
       EOF
+  }
+}
+
+data "template_file" "webserver" {
+  count    = var.clients
+  template = file("${path.module}/templates/webserver.sh.tpl")
+
+  vars = {
+      apache_exporter_version = var.apache_exporter_version
+      prometheus_dir = var.prometheus_dir
   }
 }
 
@@ -37,34 +54,18 @@ data "template_cloudinit_config" "consul_client" {
 
   }
   part {
-    content = file("${path.module}/templates/webserver.sh.tpl")
+    content = element(data.template_file.webserver.*.rendered, count.index)
   }
 }
 
-# Get Subnet Id for the VPC
-data "aws_subnet_ids" "subnets" {
-  vpc_id = var.vpc_id
 }
-
-resource "tls_private_key" "consul_key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "aws_key_pair" "consul_key" {
-  key_name   = "consul_key"
-  public_key = "${tls_private_key.consul_key.public_key_openssh}"
-}
-
 # Create the Consul cluster
 resource "aws_instance" "consul_server" {
   count = var.servers
 
-  subnet_id = element(tolist(data.aws_subnet_ids.subnets.ids), count.index)
-
   ami           = lookup(var.ami, var.region)
   instance_type = "t2.micro"
-  key_name      = aws_key_pair.consul_key.key_name
+  key_name      = var.key_name
 
   iam_instance_profile   = aws_iam_instance_profile.consul-join.name
   vpc_security_group_ids = ["${aws_security_group.opsschool_consul.id}"]
@@ -79,8 +80,6 @@ resource "aws_instance" "consul_server" {
 
 resource "aws_instance" "consul_client" {
   count = var.clients
-
-  subnet_id = element(tolist(data.aws_subnet_ids.subnets.ids), count.index)
 
   ami           = lookup(var.ami, var.region)
   instance_type = "t2.micro"

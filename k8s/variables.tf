@@ -80,5 +80,6 @@ variable "map_users" {
       username = "terraform-jenkins"
       groups =  ["system:masters"]
     }
+
   ]
 }
