@@ -36,7 +36,7 @@ data "aws_eks_cluster" "cluster" {
     {
        "Effect": "Allow",
        "Principal":{
-         "Service": "eks.amazonaws.com"
+         "Service": "ec2.amazonaws.com"
        },
        "Action": "sts:AssumeRole"
      }
@@ -50,10 +50,16 @@ data "aws_eks_cluster" "cluster" {
    role       = aws_iam_role.eks_role.name
  }
 
+  resource "aws_iam_role_policy_attachment" "eks_role-AmazonEKSDescribePolicy" {
+   policy_arn = "arn:aws:iam::872527805894:policy/AmazonEKSDescribePolicy"
+   role       = aws_iam_role.eks_role.name
+ }
+
  resource "aws_iam_role_policy_attachment" "eks_role-AmazonEKSServicePolicy" {
    policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
    role       = aws_iam_role.eks_role.name
  }
+
 
  resource "aws_iam_instance_profile" "eks_profile" {
   name = "test_profile"
@@ -87,7 +93,7 @@ resource "aws_key_pair" "consul_key"{
 
 resource "local_file" "consul_key" {
   sensitive_content  = tls_private_key.consul_key.private_key_pem
-  filename           = "bastion.pem"
+  filename           = "consul.pem"
 }
 
  resource "aws_instance" "bastion-host" {
@@ -196,8 +202,8 @@ module "eks" {
   local_exec_interpreter = var.local_exec_interpreter
   map_users              = "${concat(var.map_users, 
                                       [{
-                                        userarn  = aws_iam_instance_profile.eks_profile.arn
-                                        username = aws_iam_instance_profile.eks_profile.name
+                                        userarn  = aws_iam_role.eks_role.arn
+                                        username = aws_iam_role.eks_role.name
                                         groups =  ["system:masters"]
                                       }]
                                       )}"
