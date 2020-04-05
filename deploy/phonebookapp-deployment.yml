@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phonebookapp-deploy
+  labels:
+    app: phonebook-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: phonebook-app
+  template:
+    metadata:
+      labels:
+        app: phonebook-app
+    spec:
+      containers:
+      - image: dstefansky/phonebook-app:latest
+        name: phonebook-pod
+        ports:
+        - containerPort: 8181
+          name: http
+          protocol: TCP

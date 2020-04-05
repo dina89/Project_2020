@@ -12,19 +12,22 @@ stage('Git') { // Get code from GitLab repository
 }
 
 stage("build docker") {
-sh 'docker build "whale-app" -t dstefansky/whale-app:latest'
+sh 'cd phonebook-app'    
+sh 'sudo docker-compose up -d'
 }
 stage("verify dockers") {
 sh "docker images"
 }
 stage('Push to Docker Hub') { // Run the built image
     withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
-        sh "docker push dstefansky/whale-app:latest"
+        sh "docker push dstefansky/phonebook-app:latest"
+        sh "docker push dstefansky/phonebook-mysql:latest"
     }
   }
 stage("deploy webapp") {
     sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
     sh "kubectl apply -f deploy/loadbalancerservice.yml"
-    sh "kubectl apply -f deploy/webapp-deployment.yml"
+    sh "kubectl apply -f deploy/phonebookapp-deployment.yml"
+    sh "kubectl apply -f deploy/phonebookmysql-deployment.yml"
 }
 }

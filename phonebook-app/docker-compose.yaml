@@ -1,0 +1,20 @@
+version: '2'
+
+services:
+  phonebook-mysql:
+    container_name: dstefansky/phonebook-mysql:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-mysql
+    restart: always
+
+  phonebook-app:
+    container_name: dstefansky/phonebook-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-app
+    depends_on:
+      - phonebook-mysql
+    ports:
+      - "8181:8181"
+    restart: always
