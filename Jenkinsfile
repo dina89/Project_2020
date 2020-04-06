@@ -7,7 +7,7 @@ environment{
 def DockerImage = "whale-app:v1.0"
  def customImage = null
 stage('Git') { // Get code from GitLab repository
-    git branch: 'master',
+    git branch: 'mysqlapp',
       url: 'https://github.com/dina89/Project_2020.git'
 }
 
