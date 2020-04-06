@@ -13,7 +13,7 @@ stage('Git') { // Get code from GitLab repository
 
 stage("build docker") {
     dir("phonebook-app") {
-        sh 'sudo docker-compose up -d'
+        sh 'sudo /usr/local/bin/docker-compose up -d'
     }
 }
 stage("verify dockers") {
@@ -26,7 +26,7 @@ stage('Push to Docker Hub') { // Run the built image
     }
   }
 stage('Clean up'){
-    sh "docker-compose down --rmi all"
+    sh "sudo /usr/local/bin/docker-compose down --rmi all"
 }
 stage("deploy webapp") {
     sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
