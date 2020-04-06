@@ -15,7 +15,7 @@ spec:
         app: phonebook-mysql
     spec:
       containers:
-      - image:  phonebook-app_phonebook-mysql:latest
+      - image:  dstefansky/phonebook-app_phonebook-mysql:latest
         name: phonebookmysql-pod
         ports:
         - containerPort: 3306

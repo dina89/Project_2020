@@ -21,8 +21,8 @@ sh "curl localhost:8181"
 }
 stage('Push to Docker Hub') { // Run the built image
     withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
-        sh "docker push phonebook-app_phonebook-app:latest"
-        sh "docker push phonebook-app_phonebook-mysql:latest"
+        sh "docker push dstefansky/phonebook-app_phonebook-app:latest"
+        sh "docker push dstefansky/phonebook-app_phonebook-mysql:latest"
     }
   }
 stage('Clean up'){
