@@ -26,7 +26,7 @@ stage('Push to Docker Hub') { // Run the built image
     }
   }
 stage('Clean up'){
-    docker-compose down --rmi all
+    sh "docker-compose down --rmi all"
 }
 stage("deploy webapp") {
     sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
