@@ -12,21 +12,22 @@ stage('Git') { // Get code from GitLab repository
 }
 
 stage("build docker") {
-    sh 'ls'
     dir("phonebook-app") {
-        sh 'ls'
-        sh 'sudo /usr/local/bin/docker-compose up -d'
+        sh 'sudo docker-compose up -d'
     }
 }
 stage("verify dockers") {
-sh "docker images"
+sh "curl localhost:8181"
 }
 stage('Push to Docker Hub') { // Run the built image
     withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
-        sh "docker push phonebook-app"
-        sh "docker push phonebook-mysql"
+        sh "docker push phonebook-app_phonebook-app:latest"
+        sh "docker push phonebook-app_phonebook-mysql:latest"
     }
   }
+stage('Clean up'){
+    docker-compose down --rmi all
+}
 stage("deploy webapp") {
     sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
     sh "kubectl apply -f deploy/loadbalancerservice.yml"
