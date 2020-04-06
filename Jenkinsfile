@@ -13,7 +13,7 @@ stage('Git') { // Get code from GitLab repository
 
 stage("build docker") {
     sh 'ls'
-    dir(phonebook-app) {
+    dir("phonebook-app") {
         sh 'ls'
         sh 'sudo /usr/local/bin/docker-compose up -d'
     }
