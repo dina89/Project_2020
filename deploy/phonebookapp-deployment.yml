@@ -15,7 +15,7 @@ spec:
         app: phonebook-app
     spec:
       containers:
-      - image: dstefansky/phonebook-app_phonebook-app:latest
+      - image: dstefansky/phonebook-app:latest
         name: phonebook-pod
         ports:
         - containerPort: 8181

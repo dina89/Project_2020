@@ -25,9 +25,9 @@ stage('Push to Docker Hub') { // Run the built image
         sh "docker push dstefansky/phonebook-app_phonebook-mysql:latest"
     }
   }
-stage('Clean up'){
-    sh "sudo /usr/local/bin/docker-compose down --rmi all"
-}
+// stage('Clean up'){
+//     sh "sudo /usr/local/bin/docker-compose down --rmi all"
+// }
 stage("deploy webapp") {
     sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
     sh "kubectl apply -f deploy/loadbalancerservice.yml"
