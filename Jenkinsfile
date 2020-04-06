@@ -12,7 +12,9 @@ stage('Git') { // Get code from GitLab repository
 }
 
 stage("build docker") {
-sh 'cd phonebook-app'    
+sh 'ls'
+sh 'cd phonebook-app'
+sh 'ls'
 sh 'sudo /usr/local/bin/docker-compose up -d'
 }
 stage("verify dockers") {
