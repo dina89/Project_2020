@@ -23,8 +23,8 @@ sh "docker images"
 }
 stage('Push to Docker Hub') { // Run the built image
     withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
-        sh "docker push dstefansky/phonebook-app:latest"
-        sh "docker push dstefansky/phonebook-mysql:latest"
+        sh "docker push phonebook-app"
+        sh "docker push phonebook-mysql"
     }
   }
 stage("deploy webapp") {
