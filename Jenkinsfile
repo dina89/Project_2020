@@ -18,8 +18,8 @@ stage("build docker") {
     }
 }
 stage("verify dockers") {
-    sh 'docker run -d dstefansky/phonebook-mysql'
-    sh 'docker run -d -p 8181:8181 dstefansky/phonebook-app'
+    sh 'docker run --name phonebook-mysql -d dstefansky/phonebook-mysql'
+    sh 'docker run --name phonebook-app -d -p 8181:8181 dstefansky/phonebook-app'
     sh 'curl localhost:8181'
 }
 stage('Push to Docker Hub') { // Run the built image
