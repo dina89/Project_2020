@@ -1,7 +1,7 @@
 node("linux") {
 environment{
     credentialsId = "Github-Dina89"
-    registry = "dstefansky/phonebook-app"
+    registry = "dstefansky/phonebook-app_phonebook-app"
     registryCredential = "dockerhub-dstefansky"
 }
 def DockerImage = "phonebook-app:v1.0"
@@ -13,19 +13,20 @@ stage('Git') { // Get code from GitLab repository
 
 stage("build docker") {
     dir("phonebook-app"){
-        sh 'docker build -f Dockerfile-app -t phonebook-app_phonebook-app:latest .'
-        sh 'docker build -f Dockerfile-mysql -t phonebook-app_phonebook-mysql:latest .'
+        //sh 'docker build -f Dockerfile-app -t phonebook-app_phonebook-app:latest .'
+        //sh 'docker build -f Dockerfile-mysql -t phonebook-app_phonebook-mysql:latest .'
+        sh 'sudo /usr/local/bin/docker-compose up -d'
     }
 }
 stage("verify dockers") {
-    sh 'docker run --name phonebook-mysql -d phonebook-app_phonebook-mysql'
-    sh 'docker run --name phonebook-app -d -p 8181:8181 phonebook-app_phonebook-app'
+    //sh 'docker run --name phonebook-mysql -d phonebook-app_phonebook-mysql'
+    //sh 'docker run --name phonebook-app -d -p 8181:8181 phonebook-app_phonebook-app'
     sh 'curl localhost:8181'
 }
 stage('Push to Docker Hub') { // Run the built image
     withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
-        sh "docker push phonebook-app_phonebook-app:latest"
-        sh "docker push phonebook-app_phonebook-mysql:latest"
+        sh "docker push dstefansky/phonebook-app_phonebook-app"
+        sh "docker push dstefansky/phonebook-app_phonebook-mysql"
     }
   }
 // stage('Clean up'){
