@@ -25,8 +25,10 @@ stage("verify dockers") {
 }
 stage('Push to Docker Hub') { // Run the built image
     withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
-        sh "docker push phonebook-app_phonebook-app"
-        sh "docker push phonebook-app_phonebook-mysql"
+        sh "docker tag phonebook-app_phonebook-app dstefansky/phonebook-app:latest"
+        sh "docker tag phonebook-app_phonebook-mysql dstefansky/phonebook-mysql:latest"
+        sh "docker push dstefansky/phonebook-app:latest"
+        sh "docker push dstefansky/phonebook-mysql:latest"
     }
   }
 // stage('Clean up'){
