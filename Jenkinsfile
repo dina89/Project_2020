@@ -35,7 +35,9 @@ stage('Push to Docker Hub') { // Run the built image
 stage('Clean up'){
 //         sh 'docker rm --force dstefansky/phonebook-app'
   //  sh 'docker rm --force dstefansky/phonebook-mysql'
-  sh 'sudo /usr/local/bin/docker-compose down --rmi all'
+  dir("phonebook-app"){
+    sh 'sudo /usr/local/bin/docker-compose down --rmi all'
+  }
  }
 stage("deploy webapp") {
     sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
