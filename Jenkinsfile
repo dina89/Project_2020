@@ -13,19 +13,19 @@ stage('Git') { // Get code from GitLab repository
 
 stage("build docker") {
     dir("phonebook-app"){
-        sh 'docker build -f Dockerfile-app -t dstefansky/phonebook-app:latest .'
-        sh 'docker build -f Dockerfile-mysql -t dstefansky/phonebook-mysql:latest .'
+        sh 'docker build -f Dockerfile-app -t phonebook-app_phonebook-app:latest .'
+        sh 'docker build -f Dockerfile-mysql -t phonebook-app_phonebook-mysql:latest .'
     }
 }
 stage("verify dockers") {
-    sh 'docker run --name phonebook-mysql -d dstefansky/phonebook-mysql'
-    sh 'docker run --name phonebook-app -d -p 8181:8181 dstefansky/phonebook-app'
+    sh 'docker run --name phonebook-mysql -d phonebook-app_phonebook-mysql'
+    sh 'docker run --name phonebook-app -d -p 8181:8181 phonebook-app_phonebook-app'
     sh 'curl localhost:8181'
 }
 stage('Push to Docker Hub') { // Run the built image
     withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
-        sh "docker push dstefansky/phonebook-app:latest"
-        sh "docker push dstefansky/phonebook-mysql:latest"
+        sh "docker push phonebook-app_phonebook-app:latest"
+        sh "docker push phonebook-app_phonebook-mysql:latest"
     }
   }
 // stage('Clean up'){
