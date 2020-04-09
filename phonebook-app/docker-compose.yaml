@@ -3,7 +3,6 @@ version: '2'
 services:
   phonebook-mysql:
     container_name: phonebook-mysql
-    image: dstefansky/phonebook-mysql:latest
     build:
       context: .
       dockerfile: Dockerfile-mysql
@@ -11,7 +10,6 @@ services:
 
   phonebook-app:
     container_name: phonebook-app
-    image: dstefansky/phonebook-mysql:latest
     build:
       context: .
       dockerfile: Dockerfile-app
