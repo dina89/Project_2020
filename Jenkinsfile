@@ -18,7 +18,9 @@ stage("build docker") {
     }
 }
 stage("verify dockers") {
-sh "curl localhost:8181"
+    sh 'docker run -d dstefansky/phonebook-mysql'
+    sh 'docker run -d -p 8181:8181 dstefansky/phonebook-app'
+    sh 'curl localhost:8181'
 }
 stage('Push to Docker Hub') { // Run the built image
     withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
@@ -27,7 +29,8 @@ stage('Push to Docker Hub') { // Run the built image
     }
   }
 // stage('Clean up'){
-//     sh "sudo /usr/local/bin/docker-compose down --rmi all"
+//         sh 'docker rm --force dstefansky/phonebook-app'
+  //  sh 'docker rm --force dstefansky/phonebook-mysql'
 // }
 stage("deploy webapp") {
     sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
