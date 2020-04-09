@@ -21,6 +21,7 @@ stage("build docker") {
 stage("verify dockers") {
     //sh 'docker run --name phonebook-mysql -d phonebook-app_phonebook-mysql'
     //sh 'docker run --name phonebook-app -d -p 8181:8181 phonebook-app_phonebook-app'
+    sleep 60 // seconds
     sh 'curl localhost:8181'
 }
 stage('Push to Docker Hub') { // Run the built image
@@ -31,10 +32,11 @@ stage('Push to Docker Hub') { // Run the built image
         sh "docker push dstefansky/phonebook-mysql:latest"
     }
   }
-// stage('Clean up'){
+stage('Clean up'){
 //         sh 'docker rm --force dstefansky/phonebook-app'
   //  sh 'docker rm --force dstefansky/phonebook-mysql'
-// }
+  sh 'sudo /usr/local/bin/docker-compose down --rmi all'
+ }
 stage("deploy webapp") {
     sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
     sh "kubectl apply -f deploy/loadbalancerservice.yml"
