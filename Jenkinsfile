@@ -13,8 +13,8 @@ stage('Git') { // Get code from GitLab repository
 
 stage("build docker") {
     dir("phonebook-app"){
-        sh 'docker build -t dstefansky/phonebook-app:latest -f Dockerfile-app'
-        sh 'docker build -t dstefansky/phonebook-mysql:latest -f Dockerfile-mysql'
+        sh 'docker build -f Dockerfile-app -t dstefansky/phonebook-app:latest'
+        sh 'docker build -f Dockerfile-mysql -t dstefansky/phonebook-mysql:latest'
     }
 }
 stage("verify dockers") {
