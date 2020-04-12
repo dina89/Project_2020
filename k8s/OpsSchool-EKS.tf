@@ -177,6 +177,7 @@ module "vpc" {
   destinationCIDRblock = var.destinationCIDRblock
   ingressCIDRblock = var.ingressCIDRblock
   mapPublicIP = var.mapPublicIP
+  eks_cluster_name = local.cluster_name
 }
 
 #####################################

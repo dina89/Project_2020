@@ -31,6 +31,9 @@ variable "subnet_cidrs_private" {
 variable "destinationCIDRblock" {
   type        = string
 }
+variable "eks_cluster_name" {
+  type        = string
+}
 variable "ingressCIDRblock" {
   type        = list(string)
 }

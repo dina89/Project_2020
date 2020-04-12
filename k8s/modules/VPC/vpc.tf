@@ -14,6 +14,11 @@ resource "aws_subnet" "public" {
   vpc_id = aws_vpc.My_VPC.id
   cidr_block = var.subnet_cidrs_public[count.index]
   availability_zone = var.availability_zones[count.index]
+
+  tags = {
+   "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
+   "kubernetes.io/role/elb"                      = "1"
+ }
 }
 
 resource "aws_subnet" "private" {
@@ -22,6 +27,11 @@ resource "aws_subnet" "private" {
   vpc_id = aws_vpc.My_VPC.id
   cidr_block = var.subnet_cidrs_private[count.index]
   availability_zone = var.availability_zones[count.index]
+
+   tags = {
+   "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
+   "kubernetes.io/role/internal-elb"             = "1"
+ }
 }
 
 # Create the Route Table
