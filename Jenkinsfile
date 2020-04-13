@@ -12,10 +12,10 @@ stage('Git') { // Get code from GitLab repository
 }
 
 stage("build docker") {
-    dir("phonebook-app"){
-        sh 'docker build "whale-app" -t dstefansky/whale-app:latest'
+    sh 'docker build "whale-app" -t dstefansky/whale-app:latest'
+    //dir("phonebook-app"){
         //sh 'sudo /usr/local/bin/docker-compose up -d'
-    }
+    //}
 }
 stage("verify dockers") {// Run the built image
     sh 'sudo docker run -d -p 5000:5000 whale-app'
