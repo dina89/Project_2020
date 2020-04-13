@@ -164,6 +164,10 @@ resource "aws_security_group" "worker_group_mgmt_one" {
 
 }
 
+#####################################
+# vpc
+####################################
+
 module "vpc" {
   source = "./modules/VPC"
   aws_region = var.region
@@ -188,14 +192,25 @@ module "security" {
   source = "./modules/aws-security"
   cluster_name_sg = "OpsSchool-sg"
   vpc_id = module.vpc.vpc_id
+  ingressCIDRblock = var.ingressCIDRblock
 }
 
-# module "consul" {
-#   source = "./modules/consul"
-#   region = var.region
-#   vpc_id = module.vpc.vpc_id
-#   key_name = aws_key_pair.bastion_key.key_name
-# }
+#####################################
+# consul
+####################################
+
+module "consul" {
+   source = "./modules/consul"
+   region = var.region
+   vpc_id = module.vpc.vpc_id
+   key_name = aws_key_pair.consul_key.key_name
+   ingressCIDRblock = var.ingressCIDRblock
+   subnet_id = element(module.vpc.public_subnet_id, 1)
+ }
+
+#####################################
+# eks
+####################################
 
 module "eks" {
   source       = "terraform-aws-modules/eks/aws"

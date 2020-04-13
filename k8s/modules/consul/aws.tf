@@ -5,6 +5,7 @@ provider "aws" {
 resource "aws_security_group" "opsschool_consul" {
   name        = "opsschool-consul"
   description = "Allow ssh & consul inbound traffic"
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 0
@@ -18,7 +19,7 @@ resource "aws_security_group" "opsschool_consul" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.ingressCIDRblock
     description = "Allow ssh from the world"
   }
 
@@ -26,7 +27,7 @@ resource "aws_security_group" "opsschool_consul" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.ingressCIDRblock
     description = "Allow http from the world"
   }
 
@@ -34,7 +35,7 @@ resource "aws_security_group" "opsschool_consul" {
     from_port   = 8500
     to_port     = 8500
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.ingressCIDRblock
     description = "Allow consul UI access from the world"
   }
 
@@ -42,7 +43,7 @@ resource "aws_security_group" "opsschool_consul" {
     from_port   = 9090
     to_port     = 9090
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.ingressCIDRblock
     description = "Allow prometheus UI access from the world"
   }
 

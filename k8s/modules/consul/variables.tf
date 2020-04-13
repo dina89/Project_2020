@@ -55,3 +55,17 @@ variable "apache_exporter_version" {
   description = "Apache Exporter version"
   default = "0.7.0"
 }
+
+variable "vpc_id" {
+  description = "vpc_id for the servers"
+  type = "string"
+}
+
+variable "subnet_id" {
+  description = "subnet_id for the servers"
+  type = "string"
+}
+
+variable "ingressCIDRblock" {
+  type        = list(string)
+}

@@ -47,18 +47,18 @@ data "template_file" "webserver" {
 }
 
 # Create the user-data for the Consul agent
-data "template_cloudinit_config" "consul_client" {
-  count    = var.clients
-  part {
-    content = element(data.template_file.consul_client.*.rendered, count.index)
+# data "template_cloudinit_config" "consul_client" {
+#   count    = var.clients
+#   part {
+#     content = element(data.template_file.consul_client.*.rendered, count.index)
 
-  }
-  part {
-    content = element(data.template_file.webserver.*.rendered, count.index)
-  }
-}
+#   }
+#   # part {
+#   #   content = element(data.template_file.webserver.*.rendered, count.index)
+#   # }
+# }
 
-}
+
 # Create the Consul cluster
 resource "aws_instance" "consul_server" {
   count = var.servers
@@ -69,6 +69,9 @@ resource "aws_instance" "consul_server" {
 
   iam_instance_profile   = aws_iam_instance_profile.consul-join.name
   vpc_security_group_ids = ["${aws_security_group.opsschool_consul.id}"]
+
+  associate_public_ip_address = true
+  subnet_id = var.subnet_id
 
   tags = {
     Name = "opsschool-server-${count.index+1}"
@@ -83,16 +86,19 @@ resource "aws_instance" "consul_client" {
 
   ami           = lookup(var.ami, var.region)
   instance_type = "t2.micro"
-  key_name      = aws_key_pair.consul_key.key_name
+  key_name      = var.key_name
 
   iam_instance_profile   = aws_iam_instance_profile.consul-join.name
   vpc_security_group_ids = ["${aws_security_group.opsschool_consul.id}"]
+
+  associate_public_ip_address = true
+  subnet_id = var.subnet_id
 
   tags = {
     Name = "opsschool-client-${count.index+1}"
   }
 
-  user_data = element(data.template_cloudinit_config.consul_client.*.rendered, count.index)
+  user_data = element(data.template_file.consul_client.*.rendered, count.index)
 }
 
 output "servers" {

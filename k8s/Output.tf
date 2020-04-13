@@ -23,3 +23,19 @@ output "region" {
   value       = var.region
 }
 
+output "bastio_host" {
+  description = "Bastion host"
+  value = ["${aws_instance.bastion-host.*.public_ip}"]
+}
+
+output "consul_servers" {
+  value = module.consul.servers
+}
+
+output "consul_clients" {
+  value = module.consul.clients
+}
+
+output "promcol" {
+  value = module.consul.promcol
+}
