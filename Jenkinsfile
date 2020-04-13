@@ -18,7 +18,7 @@ stage("build docker") {
     //}
 }
 stage("verify dockers") {// Run the built image
-    sh 'sudo docker run -d -p 5000:5000 whale-app'
+    sh 'sudo docker run -d -p 5000:5000 dstefansky/whale-app:latest'
     sleep 30 // seconds
     sh 'curl localhost:5000'
 }
