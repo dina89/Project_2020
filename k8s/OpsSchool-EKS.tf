@@ -96,6 +96,18 @@ resource "local_file" "consul_key" {
   filename           = "consul.pem"
 }
 
+# Create the helm user-data for the bastion server
+data "template_file" "bastion_server" {
+  template = file("${path.module}/templates/bastion.sh.tpl")
+
+  vars = {
+    helm_version = var.helm_version
+    consul_helm_version = var.consul_helm_version
+    eks_cluster_name = var.eks_cluster_name
+    consul_secret = var.consul_secret
+  }
+}
+
  resource "aws_instance" "bastion-host" {
   count = 1
   ami = "ami-024582e76075564db"
@@ -106,17 +118,12 @@ resource "local_file" "consul_key" {
   iam_instance_profile = aws_iam_instance_profile.eks_profile.name
   associate_public_ip_address = true
 
-    provisioner "remote-exec"{
-      inline = [
-          "sudo apt-get install unzip",
-          "curl 'https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip' -o 'awscliv2.zip'",
-          "unzip awscliv2.zip",
-          "sudo ./aws/install",
-          "curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/kubectl",
-          "chmod +x ./kubectl",
-          "sudo mv ./kubectl /usr/local/bin/kubectl"
-      ]
-  }
+    provisioner "file" {
+    source      = "values.yaml"
+    destination = "/tmp/values.yaml"
+    }
+
+  user_data = data.template_file.bastion_server.rendered
 
     connection {
       type = "ssh"
@@ -124,6 +131,8 @@ resource "local_file" "consul_key" {
       user = "ubuntu"
       private_key = tls_private_key.bastion_key.private_key_pem
   }
+
+  depends_on = [module.eks, module.consul]
 
 }
 
@@ -204,7 +213,7 @@ module "consul" {
    region = var.region
    vpc_id = module.vpc.vpc_id
    key_name = aws_key_pair.consul_key.key_name
-   ingressCIDRblock = var.ingressCIDRblock
+   ingressCIDRblock = "${concat(var.ingressCIDRblock, [join("", [aws_instance.bastion-host.0.public_ip, "/32"])])}"
    subnet_id = element(module.vpc.public_subnet_id, 1)
  }
 

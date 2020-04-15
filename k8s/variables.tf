@@ -52,8 +52,8 @@ variable "destinationCIDRblock" {
         default = "0.0.0.0/0"
 }
 variable "ingressCIDRblock" {
-        type = "list"
-        default = [ "85.250.120.117/32" ]
+        type =  list(string)
+        default = [ "85.250.123.80/32" ]
 }
 variable "mapPublicIP" {
         default = true
@@ -82,4 +82,20 @@ variable "map_users" {
     }
 
   ]
+}
+
+variable "helm_version" {
+  default = "2.16.6"
+}
+
+variable "consul_helm_version" {
+  default = "0.19.0"
+}
+
+variable "eks_cluster_name" {
+  default = "opsSchool-eks-dina"
+}
+
+variable "consul_secret" {
+  default = "uDBV4e+LbFW3019YKPxIrg=="
 }

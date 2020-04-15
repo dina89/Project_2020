@@ -13,6 +13,24 @@ scrape_configs:
   - job_name: 'prometheus'
     static_configs:
     - targets: ['localhost:9090']
+
+  - job_name: 'whale-exporter'
+    consul_sd_configs:
+      - server: 'localhost:8500'
+    relabel_configs:
+      - source_labels: ['__meta_consul_tags']
+        regex:  '.*,opsschool_hello_whale,.*'
+        target_label: job
+        # This will drop all targets that do not match the regex rule,
+        # leaving only the 'opsschool_flask' targets
+        action: 'keep'
+      - source_labels: ['__address__']
+        separator:     ':'
+        regex:         '(.*):(.*)'
+        target_label:  '__address__'
+        replacement:   '$1:5001'
+      - source_labels: [__meta_consul_node]
+        target_label: instance
 EOF
 
 # Configure promcol service
