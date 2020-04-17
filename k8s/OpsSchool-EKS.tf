@@ -96,17 +96,17 @@ resource "local_file" "consul_key" {
   filename           = "consul.pem"
 }
 
-# Create the helm user-data for the bastion server
-data "template_file" "bastion_server" {
-  template = file("${path.module}/templates/bastion.sh.tpl")
+# # Create the helm user-data for the bastion server
+# data "template_file" "bastion_server" {
+#   template = file("${path.module}/templates/bastion.sh.tpl")
 
-  vars = {
-    helm_version = var.helm_version
-    consul_helm_version = var.consul_helm_version
-    eks_cluster_name = var.eks_cluster_name
-    consul_secret = var.consul_secret
-  }
-}
+#   vars = {
+#     helm_version = var.helm_version
+#     consul_helm_version = var.consul_helm_version
+#     eks_cluster_name = var.eks_cluster_name
+#     consul_secret = var.consul_secret
+#   }
+# }
 
  resource "aws_instance" "bastion-host" {
   count = 1
@@ -123,7 +123,26 @@ data "template_file" "bastion_server" {
     destination = "/tmp/values.yaml"
     }
 
-  user_data = data.template_file.bastion_server.rendered
+    provisioner "remote-exec"{
+
+      inline = [
+          "sudo apt-get install unzip",
+          "curl 'https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip' -o 'awscliv2.zip'",
+          "unzip awscliv2.zip",
+          "sudo ./aws/install",
+          "curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/kubectl",
+          "chmod +x ./kubectl",
+          "sudo mv ./kubectl /usr/local/bin/kubectl",
+          "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina",
+          "curl -Ssl https://get.helm.sh/helm-v3.2.0-rc.1-linux-amd64.tar.gz -o helm-v3.2.0-rc.1-linux-amd64.tar.gz",
+          "tar -zxvf helm-v3.2.0-rc.1-linux-amd64.tar.gz",
+          "sudo mv linux-amd64/helm /usr/local/bin/helm",
+          "git clone --single-branch --branch v0.19.0 https://github.com/hashicorp/consul-helm.git",
+          "kubectl create secret generic consul-gossip-encryption-key --from-literal=key=\"uDBV4e+LbFW3019YKPxIrg==\"",
+          "sudo cp /tmp/values.yaml ./consul-helm/values.yaml",
+          "helm install hashicorp ./consul-helm"
+      ]
+  }
 
     connection {
       type = "ssh"
@@ -132,7 +151,7 @@ data "template_file" "bastion_server" {
       private_key = tls_private_key.bastion_key.private_key_pem
   }
 
-  depends_on = [module.eks, module.consul]
+  depends_on = [module.eks]
 
 }
 
@@ -166,9 +185,79 @@ resource "aws_security_group" "worker_group_mgmt_one" {
     to_port   = 22
     protocol  = "tcp"
 
-    cidr_blocks = [
-      var.vpcCIDRblock
-    ]
+    cidr_blocks = [var.vpcCIDRblock]
+  }
+
+  ingress {
+    from_port   = 8500
+    to_port     = 8500
+    protocol    = "tcp"
+    cidr_blocks = [var.vpcCIDRblock]
+    description = "Allow consul access from the vpc"
+  }
+
+  ingress {
+    from_port   = 8600
+    to_port     = 8600
+    protocol    = "tcp"
+    cidr_blocks = [var.vpcCIDRblock]
+    description = "Allow consul access from the vpc"
+  }
+
+  ingress {
+    from_port   = 8600
+    to_port     = 8600
+    protocol    = "udp"
+    cidr_blocks = [var.vpcCIDRblock]
+    description = "Allow consul access from the vpc"
+  }
+
+  ingress {
+    from_port   = 8300
+    to_port     = 8300
+    protocol    = "tcp"
+    cidr_blocks = [var.vpcCIDRblock]
+    description = "Allow consul access from the vpc"
+  }
+
+  ingress {
+    from_port   = 8301
+    to_port     = 8301
+    protocol    = "tcp"
+    cidr_blocks = [var.vpcCIDRblock]
+    description = "Allow consul access from the vpc"
+  }
+
+  ingress {
+    from_port   = 8301
+    to_port     = 8301
+    protocol    = "udp"
+    cidr_blocks = [var.vpcCIDRblock]
+    description = "Allow consul access from the vpc"
+  }
+
+  ingress {
+    from_port   = 8302
+    to_port     = 8302
+    protocol    = "tcp"
+    cidr_blocks = [var.vpcCIDRblock]
+    description = "Allow consul access from the vpc"
+  }
+
+  ingress {
+    from_port   = 8302
+    to_port     = 8302
+    protocol    = "udp"
+    cidr_blocks = [var.vpcCIDRblock]
+    description = "Allow consul access from the vpc"
+  }
+
+    ingress {
+    from_port   = 8502
+    to_port     = 8502
+    protocol    = "tcp"
+    cidr_blocks = [var.vpcCIDRblock]
+    description = "Allow consul access from the vpc"
   }
 
 }
@@ -213,7 +302,7 @@ module "consul" {
    region = var.region
    vpc_id = module.vpc.vpc_id
    key_name = aws_key_pair.consul_key.key_name
-   ingressCIDRblock = "${concat(var.ingressCIDRblock, [join("", [aws_instance.bastion-host.0.public_ip, "/32"])])}"
+   ingressCIDRblock = "${concat(var.ingressCIDRblock, [join("", [var.vpcCIDRblock])])}"
    subnet_id = element(module.vpc.public_subnet_id, 1)
  }
 
@@ -250,7 +339,7 @@ module "eks" {
   worker_groups = [
     {
       name                          = "worker-group-1"
-      instance_type                 = "t2.micro"
+      instance_type                 = "t3.small"
       additional_userdata           = "echo foo bar"
       asg_desired_capacity          = 2
       additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]

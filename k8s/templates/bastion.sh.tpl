@@ -16,7 +16,7 @@ aws eks --region us-east-1 update-kubeconfig --name ${eks_cluster_name}
 curl -Ssl https://get.helm.sh/helm-v${helm_version}-linux-amd64.tar.gz -o helm-v${helm_version}-linux-amd64.tar.gz
 tar -zxvf helm-v${helm_version}-linux-amd64.tar.gz
 sudo mv linux-amd64/helm /usr/local/bin/helm
-helm init
+
 
 #download the consul helm chart
 git clone --single-branch --branch v${consul_helm_version} https://github.com/hashicorp/consul-helm.git
@@ -28,4 +28,29 @@ kubectl create secret generic consul-gossip-encryption-key --from-literal=key="$
 sudo cp /tmp/values.yaml ./consul-helm/values.yaml
 
 #install the helm chart
-helm install ./consul-helm
+helm install hashicorp ./consul-helm
+
+kubectl get svc <release-name>-consul-dns -o jsonpath='{.spec.clusterIP}'
+KUBE_EDITOR="nano" kubectl edit configmap coredns -n kube-system
+
+consul {
+  errors
+  cache 30
+  forward . <consul-dns-service-cluster-ip>  for example : 172.20.99.232  172.20.201.204 
+}
+
+variable "helm_version" {
+  default = "3.2.0-rc.1"
+}
+
+variable "consul_helm_version" {
+  default = "0.19.0"
+}
+
+variable "eks_cluster_name" {
+  default = "opsSchool-eks-dina"
+}
+
+variable "consul_secret" {
+  default = "uDBV4e+LbFW3019YKPxIrg=="
+}

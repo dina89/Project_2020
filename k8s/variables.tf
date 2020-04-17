@@ -85,7 +85,7 @@ variable "map_users" {
 }
 
 variable "helm_version" {
-  default = "2.16.6"
+  default = "3.2.0-rc.1"
 }
 
 variable "consul_helm_version" {
