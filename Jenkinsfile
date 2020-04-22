@@ -43,6 +43,7 @@ stage("deploy webapp") {
     //sh "kubectl apply -f deploy/phonebookapp-deployment.yml"
     // sh "kubectl apply -f deploy/phonebookmysql-deployment.yml"
     sh "kubectl apply -f deploy/loadbalancerservice.yml"
+    sh "kubectl apply -f deploy/loadbalancerservicemetrics.yml"
     sh "kubectl apply -f deploy/webapp-deployment.yml"
 }
 }
