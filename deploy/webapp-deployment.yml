@@ -22,5 +22,5 @@ spec:
           name: http
           protocol: TCP
         - containerPort: 5001
-          name: http
+          name: metrics
           protocol: TCP
