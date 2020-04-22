@@ -21,3 +21,6 @@ spec:
         - containerPort: 5000
           name: http
           protocol: TCP
+        - containerPort: 5001
+          name: http
+          protocol: TCP

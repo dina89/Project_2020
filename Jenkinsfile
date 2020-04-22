@@ -33,16 +33,16 @@ stage('Push to Docker Hub') {
     }
   }
 stage('Clean up'){
-     //sh 'docker rm --force whale'
+     sh 'docker rm --force whale'
 //   dir("phonebook-app"){
 //     sh 'sudo /usr/local/bin/docker-compose down --rmi all'
 //   }
  }
 stage("deploy webapp") {
-    //sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
-    // sh "kubectl apply -f deploy/phonebookapp-deployment.yml"
+    sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
+    sh "kubectl apply -f deploy/phonebookapp-deployment.yml"
     // sh "kubectl apply -f deploy/phonebookmysql-deployment.yml"
     //sh "kubectl apply -f deploy/loadbalancerservice.yml"
-    //sh "kubectl apply -f deploy/webapp-deployment.yml"
+    sh "kubectl apply -f deploy/webapp-deployment.yml"
 }
 }
