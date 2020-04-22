@@ -140,7 +140,9 @@ resource "local_file" "consul_key" {
           "git clone --single-branch --branch v0.19.0 https://github.com/hashicorp/consul-helm.git",
           "kubectl create secret generic consul-gossip-encryption-key --from-literal=key=\"uDBV4e+LbFW3019YKPxIrg==\"",
           "sudo cp /tmp/values.yaml ./consul-helm/values.yaml",
-          "helm install hashicorp ./consul-helm"
+          "helm install hashicorp ./consul-helm",
+          "git clone https://github.com/helm/charts.git",
+          "helm install opsschool-nodeexporter ./charts/stable/prometheus-node-exporter"
       ]
   }
 
@@ -260,6 +262,22 @@ resource "aws_security_group" "worker_group_mgmt_one" {
     description = "Allow consul access from the vpc"
   }
 
+    ingress {
+    from_port   = 9100
+    to_port     = 9100
+    protocol    = "tcp"
+    cidr_blocks = [var.vpcCIDRblock]
+    description = "Allow prometheus access from the vpc"
+  }
+  
+    ingress {
+    from_port   = 5001
+    to_port     = 5001
+    protocol    = "tcp"
+    cidr_blocks = [var.vpcCIDRblock]
+    description = "Allow prometheus access from the vpc"
+  }
+
 }
 
 #####################################
@@ -303,7 +321,7 @@ module "consul" {
    vpc_id = module.vpc.vpc_id
    key_name = aws_key_pair.consul_key.key_name
    ingressCIDRblock = "${concat(var.ingressCIDRblock, [join("", [var.vpcCIDRblock])])}"
-   subnet_id = element(module.vpc.public_subnet_id, 1)
+   subnet_id = element(module.vpc.public_subnet_id, 0)
  }
 
 #####################################

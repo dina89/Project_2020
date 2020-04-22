@@ -76,9 +76,9 @@ sudo docker build -t flask-http:latest .
 
         {
   "service": {
-    "id": "flask-http-server-5000",
-    "name": "flask-http-server",
-    "tags": ["opsschool_flask"],
+    "id": "whale-server-5000",
+    "name": "whale-server",
+    "tags": ["opsschool_hello_whale"],
     "port": 5000,
     "checks": [
       {

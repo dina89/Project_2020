@@ -14,6 +14,19 @@ scrape_configs:
     static_configs:
     - targets: ['localhost:9090']
 
+  - job_name: 'node-exporter'
+    consul_sd_configs:
+      - server: 'localhost:8500'
+    # All hosts detected will use port 9100 for node-exporter
+    relabel_configs:
+      - source_labels: ['__address__']
+        separator:     ':'
+        regex:         '(.*):(.*)'
+        target_label:  '__address__'
+        replacement:   '$1:9100'
+      - source_labels: [__meta_consul_node]
+        target_label: instance
+
   - job_name: 'whale-exporter'
     consul_sd_configs:
       - server: 'localhost:8500'
@@ -28,7 +41,28 @@ scrape_configs:
         separator:     ':'
         regex:         '(.*):(.*)'
         target_label:  '__address__'
-        replacement:   '$1:5001'
+        replacement:   '$1:80'
+      - source_labels: [__meta_consul_node]
+        target_label: instance
+
+  - job_name: 'consul-exporter'
+    consul_sd_configs:
+      - server: 'localhost:8500'
+    relabel_configs:
+      - source_labels: ['__meta_consul_service']
+        regex:  '^consul$'
+        target_label: job
+        # This will drop all targets that do not match the regex rule,
+        # leaving only the 'consul' targets
+        action: 'keep'
+      - source_labels: []
+        replacement:   '/v1/agent/metrics?format=prometheus'
+        target_label: __metrics_path__
+      - source_labels: ['__address__']
+        separator:     ':'
+        regex:         '(.*):(.*)'
+        target_label:  '__address__'
+        replacement:   '$1:8500'
       - source_labels: [__meta_consul_node]
         target_label: instance
 EOF

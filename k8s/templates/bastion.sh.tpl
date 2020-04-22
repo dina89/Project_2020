@@ -36,7 +36,7 @@ KUBE_EDITOR="nano" kubectl edit configmap coredns -n kube-system
 consul {
   errors
   cache 30
-  forward . <consul-dns-service-cluster-ip>  for example : 172.20.99.232  172.20.201.204 
+  forward . <consul-dns-service-cluster-ip>  for example 172.20.172.68 
 }
 
 variable "helm_version" {
@@ -54,3 +54,12 @@ variable "eks_cluster_name" {
 variable "consul_secret" {
   default = "uDBV4e+LbFW3019YKPxIrg=="
 }
+
+#install promcol node exporter
+git clone https://github.com/helm/charts.git
+helm install opsschool-nodeexporter ./charts/stable/prometheus-node-exporter
+
+1. Get the application URL by running these commands:
+  export POD_NAME=$(kubectl get pods --namespace default -l "app=prometheus-node-exporter,release=opsschool-nodeexporter" -o jsonpath="{.items[0].metadata.name}")
+  echo "Visit http://127.0.0.1:9100 to use your application"
+  kubectl port-forward --namespace default $POD_NAME 9100
