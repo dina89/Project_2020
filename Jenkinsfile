@@ -40,9 +40,9 @@ stage('Clean up'){
  }
 stage("deploy webapp") {
     sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
-    sh "kubectl apply -f deploy/phonebookapp-deployment.yml"
+    //sh "kubectl apply -f deploy/phonebookapp-deployment.yml"
     // sh "kubectl apply -f deploy/phonebookmysql-deployment.yml"
-    //sh "kubectl apply -f deploy/loadbalancerservice.yml"
+    sh "kubectl apply -f deploy/loadbalancerservice.yml"
     sh "kubectl apply -f deploy/webapp-deployment.yml"
 }
 }
