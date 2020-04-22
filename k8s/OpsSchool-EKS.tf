@@ -66,35 +66,6 @@ data "aws_eks_cluster" "cluster" {
   role = "${aws_iam_role.eks_role.name}"
 }
 
-resource "tls_private_key" "bastion_key"{
-  algorithm = "RSA"
-  rsa_bits = 4096
-}
-
-resource "aws_key_pair" "bastion_key"{
-  key_name = "bastion_key"
-  public_key = tls_private_key.bastion_key.public_key_openssh
-}
-
-resource "local_file" "bastion_key" {
-  sensitive_content  = tls_private_key.bastion_key.private_key_pem
-  filename           = "bastion.pem"
-}
-
-resource "tls_private_key" "consul_key"{
-  algorithm = "RSA"
-  rsa_bits = 4096
-}
-
-resource "aws_key_pair" "consul_key"{
-  key_name = "consul_key"
-  public_key = tls_private_key.consul_key.public_key_openssh
-}
-
-resource "local_file" "consul_key" {
-  sensitive_content  = tls_private_key.consul_key.private_key_pem
-  filename           = "consul.pem"
-}
 
 # # Create the helm user-data for the bastion server
 # data "template_file" "bastion_server" {
@@ -121,6 +92,10 @@ resource "local_file" "consul_key" {
     provisioner "file" {
     source      = "values.yaml"
     destination = "/tmp/values.yaml"
+    }
+
+    tags = {
+    Name = "bastion"
     }
 
     provisioner "remote-exec"{
@@ -312,7 +287,7 @@ module "security" {
 }
 
 #####################################
-# consul
+# consul & promcol
 ####################################
 
 module "consul" {
@@ -320,9 +295,34 @@ module "consul" {
    region = var.region
    vpc_id = module.vpc.vpc_id
    key_name = aws_key_pair.consul_key.key_name
-   ingressCIDRblock = "${concat(var.ingressCIDRblock, [join("", [var.vpcCIDRblock])])}"
+   ingressCIDRblock = "${concat(var.ingressCIDRblock, [join("", [var.vpcCIDRblock])], [join("",[element(module.grafana.grafana, 0), "/32"])])}"
    subnet_id = element(module.vpc.public_subnet_id, 0)
  }
+
+#####################################
+# grafana
+####################################
+
+module "grafana" {
+   source = "./modules/grafana"
+   region = var.region
+   vpc_id = module.vpc.vpc_id
+   key_name = aws_key_pair.grafana_key.key_name
+   ingressCIDRblock = "${concat(var.ingressCIDRblock, [join("", [var.vpcCIDRblock])])}"
+   subnet_id = element(module.vpc.public_subnet_id, 0)
+   prometheus_ip = element(module.consul.promcol, 0)
+ }
+
+provider "grafana" {
+  url  = "http://${element(module.grafana.grafana, 0)}:3000"
+  auth = "admin:admin"
+}
+
+resource "grafana_data_source" "prometheus" {
+  type          = "Prometheus"
+  name          = "opsschool_prometheus"
+  url           = "http://${element(module.consul.promcol, 0)}:9090"
+}
 
 #####################################
 # eks

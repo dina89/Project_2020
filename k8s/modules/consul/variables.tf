@@ -20,7 +20,7 @@ variable "consul_version" {
 
 variable "key_name" {
   description = "name of ssh key to attach to hosts"
-  default = "radzi"
+  default = "Dinas"
 }
 
 variable "ami" {

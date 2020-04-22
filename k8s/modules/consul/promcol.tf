@@ -54,6 +54,6 @@ resource "aws_instance" "promcol" {
 }
 
 output "promcol" {
-  value = ["${aws_instance.promcol.*.public_ip}"]
+  value = aws_instance.promcol.*.public_ip
 }
 

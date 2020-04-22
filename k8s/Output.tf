@@ -39,3 +39,7 @@ output "consul_clients" {
 output "promcol" {
   value = module.consul.promcol
 }
+
+output "grafana" {
+  value = module.grafana.grafana
+}

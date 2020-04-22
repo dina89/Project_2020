@@ -102,9 +102,9 @@ resource "aws_instance" "consul_client" {
 }
 
 output "servers" {
-  value = ["${aws_instance.consul_server.*.public_ip}"]
+  value = aws_instance.consul_server.*.public_ip
 }
 
 output "clients" {
-  value = ["${aws_instance.consul_client.*.public_ip}"]
+  value = aws_instance.consul_client.*.public_ip
 }
