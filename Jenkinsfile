@@ -18,9 +18,11 @@ stage("build docker") {
     //}
 }
 stage("verify dockers") {// Run the built image
-    sh 'sudo docker run --name whale -d -p 5001:5001 dstefansky/whale-app:latest'
+    sh 'sudo docker run --name whalemetrics -d -p 5001:5001 dstefansky/whale-app:latest'
+    sh 'sudo docker run --name whaleapp -d -p 5000:5000 dstefansky/whale-app:latest'
     sleep 30 // seconds
     sh 'curl localhost:5001'
+    sh 'curl localhost:5000'
 }
 stage('Push to Docker Hub') { 
     withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
@@ -32,7 +34,8 @@ stage('Push to Docker Hub') {
     }
   }
 stage('Clean up'){
-     //sh 'docker rm --force whale'
+     //sh 'docker rm --force whalemetrics'
+     //sh 'docker rm --force whaleapp'
 //   dir("phonebook-app"){
 //     sh 'sudo /usr/local/bin/docker-compose down --rmi all'
 //   }
