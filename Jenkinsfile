@@ -18,9 +18,9 @@ stage("build docker") {
     //}
 }
 stage("verify dockers") {// Run the built image
-    sh 'sudo docker run --name whale -d -p 5000:5000 dstefansky/whale-app:latest'
+    sh 'sudo docker run --name whale -d -p 5001:5001 dstefansky/whale-app:latest'
     sleep 30 // seconds
-    sh 'curl localhost:5000'
+    sh 'curl localhost:5001'
 }
 stage('Push to Docker Hub') { 
     withDockerRegistry(credentialsId: 'dockerhub-dstefansky') {
@@ -32,16 +32,16 @@ stage('Push to Docker Hub') {
     }
   }
 stage('Clean up'){
-     sh 'docker rm --force whale'
+     //sh 'docker rm --force whale'
 //   dir("phonebook-app"){
 //     sh 'sudo /usr/local/bin/docker-compose down --rmi all'
 //   }
  }
 stage("deploy webapp") {
-    sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
+    //sh "aws eks --region us-east-1 update-kubeconfig --name opsSchool-eks-dina"
     // sh "kubectl apply -f deploy/phonebookapp-deployment.yml"
     // sh "kubectl apply -f deploy/phonebookmysql-deployment.yml"
-    sh "kubectl apply -f deploy/loadbalancerservice.yml"
-    sh "kubectl apply -f deploy/webapp-deployment.yml"
+    //sh "kubectl apply -f deploy/loadbalancerservice.yml"
+    //sh "kubectl apply -f deploy/webapp-deployment.yml"
 }
 }
