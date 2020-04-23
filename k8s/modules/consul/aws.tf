@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_security_group" "opsschool_consul" {
-  name        = "opsschool-consul"
+  name        = "opsschool-consul2"
   description = "Allow ssh & consul inbound traffic"
   vpc_id      = var.vpc_id
 

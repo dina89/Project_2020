@@ -117,7 +117,13 @@ data "aws_eks_cluster" "cluster" {
           "sudo cp /tmp/values.yaml ./consul-helm/values.yaml",
           "helm install hashicorp ./consul-helm",
           "git clone https://github.com/helm/charts.git",
-          "helm install opsschool-nodeexporter ./charts/stable/prometheus-node-exporter"
+          "helm install opsschool-nodeexporter ./charts/stable/prometheus-node-exporter",
+          "sudo apt update",
+          "sudo apt install software-properties-common",
+          "sudo apt-add-repository --yes --update ppa:ansible/ansible",
+          "sudo apt install ansible",
+          "sudo apt-get update -y",
+          "sudo apt-get install -y python3-jmespath"
       ]
   }
 
@@ -320,8 +326,10 @@ provider "grafana" {
 
 resource "grafana_data_source" "prometheus" {
   type          = "Prometheus"
-  name          = "opsschool_prometheus"
+  name          = "prometheus"
   url           = "http://${element(module.consul.promcol, 0)}:9090"
+  access        = "proxy"
+  basicAuth     = "false"
 }
 
 #####################################
