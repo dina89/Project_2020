@@ -328,8 +328,6 @@ resource "grafana_data_source" "prometheus" {
   type          = "Prometheus"
   name          = "prometheus"
   url           = "http://${element(module.consul.promcol, 0)}:9090"
-  access        = "proxy"
-  basicAuth     = "false"
 }
 
 #####################################
