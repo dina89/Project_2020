@@ -42,3 +42,18 @@ resource "local_file" "grafana_key" {
   sensitive_content  = tls_private_key.grafana_key.private_key_pem
   filename           = "grafana.pem"
 }
+
+resource "tls_private_key" "elk_key"{
+  algorithm = "RSA"
+  rsa_bits = 4096
+}
+
+resource "aws_key_pair" "elk_key"{
+  key_name = "elk_key"
+  public_key = tls_private_key.elk_key.public_key_openssh
+}
+
+resource "local_file" "elk_key" {
+  sensitive_content  = tls_private_key.elk_key.private_key_pem
+  filename           = "elk.pem"
+}

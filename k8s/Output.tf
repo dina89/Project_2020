@@ -43,3 +43,7 @@ output "promcol" {
 output "grafana" {
   value = module.grafana.grafana
 }
+
+output "elk" {
+  value = module.elk.elk
+}

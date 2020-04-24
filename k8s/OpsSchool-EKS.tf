@@ -118,12 +118,7 @@ data "aws_eks_cluster" "cluster" {
           "helm install hashicorp ./consul-helm",
           "git clone https://github.com/helm/charts.git",
           "helm install opsschool-nodeexporter ./charts/stable/prometheus-node-exporter",
-          "sudo apt update",
-          "sudo apt install software-properties-common",
-          "sudo apt-add-repository --yes --update ppa:ansible/ansible",
-          "sudo apt install ansible",
-          "sudo apt-get update -y",
-          "sudo apt-get install -y python3-jmespath"
+          "curl -L -O https://raw.githubusercontent.com/elastic/beats/master/deploy/kubernetes/filebeat-kubernetes.yaml"
       ]
   }
 
@@ -319,16 +314,29 @@ module "grafana" {
    prometheus_ip = element(module.consul.promcol, 0)
  }
 
-provider "grafana" {
-  url  = "http://${element(module.grafana.grafana, 0)}:3000"
-  auth = "admin:admin"
-}
+# provider "grafana" {
+#   url  = "http://${element(module.grafana.grafana, 0)}:3000"
+#   auth = "admin:admin"
+# }
 
-resource "grafana_data_source" "prometheus" {
-  type          = "Prometheus"
-  name          = "prometheus"
-  url           = "http://${element(module.consul.promcol, 0)}:9090"
-}
+# resource "grafana_data_source" "prometheus" {
+#   type          = "Prometheus"
+#   name          = "prometheus"
+#   url           = "http://${element(module.consul.promcol, 0)}:9090"
+# }
+#####################################
+# grafana
+####################################
+
+module "elk" {
+   source = "./modules/elk"
+   region = var.region
+   vpc_id = module.vpc.vpc_id
+   key_name = aws_key_pair.elk_key.key_name
+   ingressCIDRblock = "${concat(var.ingressCIDRblock, [join("", [var.vpcCIDRblock])])}"
+   subnet_id = element(module.vpc.public_subnet_id, 0)
+ }
+
 
 #####################################
 # eks

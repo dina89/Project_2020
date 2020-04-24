@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from prometheus_client import start_http_server, Counter, Summary
+import logging
 
 app = Flask(__name__)
 
@@ -12,6 +13,7 @@ hello_whale_timer = time_metric.labels(method="hello_whale")
 @hello_whale_timer.time()
 def hello_whale():
     call_metric.labels(service='opsschool_hello_whale', endpoint='main').inc(1)
+    logging.info('Hello Whale main page hit')
     return render_template("whale_hello.html")
 
 if __name__ == '__main__':
